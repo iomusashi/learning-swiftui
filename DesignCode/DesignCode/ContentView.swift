@@ -10,6 +10,8 @@ import SwiftUI
 struct ContentView: View {
   var body: some View {
     ZStack {
+      TitleView()
+      
       BackCardView(
         offset: CGPoint(x: 0, y: -40),
         backgroundColor: Color("card4"),
@@ -89,5 +91,21 @@ struct BackCardView: View {
       axis: (x: CGFloat(rotationDegree), y: 0.0, z: 0.0)
     )
     .blendMode(.hardLight)
+  }
+}
+
+struct TitleView: View {
+  var body: some View {
+    VStack {
+      HStack {
+        Text("Certificates")
+          .font(.largeTitle)
+          .fontWeight(.bold)
+        Spacer()
+      }
+      .padding()
+      Image("Background1")
+      Spacer()
+    }
   }
 }

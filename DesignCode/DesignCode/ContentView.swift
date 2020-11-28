@@ -8,27 +8,41 @@
 import SwiftUI
 
 struct ContentView: View {
+  
+  @State var cardShown = false
+  
   var body: some View {
     ZStack {
-      TitleView()
-      
+      TitleView(
+        blurRadius: cardShown ? 20 : 0
+      )
+      .animation(.default)
+
       BackCardView(
-        offset: CGPoint(x: 0, y: -40),
+        offset: CGPoint(x: 0, y: cardShown ? -400 : -40),
         backgroundColor: Color("card4"),
         scaleFactor: 0.9,
-        rotationDegree: 10
+        rotationDegree: cardShown ? 0 : 10
       )
+      .animation(.easeInOut(duration: 0.4))
 
       BackCardView(
-        offset: CGPoint(x: 0, y: -20),
+        offset: CGPoint(x: 0, y: cardShown ? -200 : -20),
         backgroundColor: Color("card3"),
         scaleFactor: 0.95,
-        rotationDegree: 5
+        rotationDegree: cardShown ? 0 : 5
       )
+      .animation(.easeInOut(duration: 0.3))
 
       CardView()
+        .onTapGesture {
+          cardShown.toggle()
+        }
       
-      BottomCardView()
+      BottomCardView(
+        blurRadius: cardShown ? 20 : 0
+      )
+      .animation(.default)
     }
   }
 }
@@ -97,6 +111,9 @@ struct BackCardView: View {
 }
 
 struct TitleView: View {
+  
+  var blurRadius: CGFloat = .zero
+  
   var body: some View {
     VStack {
       HStack {
@@ -109,10 +126,14 @@ struct TitleView: View {
       Image("Background1")
       Spacer()
     }
+    .blur(radius: blurRadius)
   }
 }
 
 struct BottomCardView: View {
+  
+  var blurRadius: CGFloat = .zero
+  
   var body: some View {
     VStack(spacing: 20.0) {
       Rectangle()
@@ -132,5 +153,6 @@ struct BottomCardView: View {
     .cornerRadius(30)
     .shadow(radius: 20)
     .offset(x: 0, y: 500)
+    .blur(radius: blurRadius)
   }
 }

@@ -10,6 +10,7 @@ import SwiftUI
 struct ContentView: View {
   
   @State var cardShown = false
+  @State var dragBoxSize = CGSize.zero
   
   var body: some View {
     ZStack {
@@ -18,11 +19,17 @@ struct ContentView: View {
       )
       .animation(.default)
 
+      BottomCardView(
+        blurRadius: cardShown ? 20 : 0
+      )
+      .animation(.default)
+
       BackCardView(
         offset: CGPoint(x: 0, y: cardShown ? -400 : -40),
         backgroundColor: Color("card4"),
         scaleFactor: 0.9,
-        rotationDegree: cardShown ? 0 : 10
+        rotationDegree: cardShown ? 0 : 10,
+        dragOffset: dragBoxSize
       )
       .animation(.easeInOut(duration: 0.4))
 
@@ -30,19 +37,31 @@ struct ContentView: View {
         offset: CGPoint(x: 0, y: cardShown ? -200 : -20),
         backgroundColor: Color("card3"),
         scaleFactor: 0.95,
-        rotationDegree: cardShown ? 0 : 5
+        rotationDegree: cardShown ? 0 : 5,
+        dragOffset: dragBoxSize
       )
       .animation(.easeInOut(duration: 0.3))
 
-      CardView()
-        .onTapGesture {
-          cardShown.toggle()
-        }
-      
-      BottomCardView(
-        blurRadius: cardShown ? 20 : 0
+      CardView(
+        dragOffset: dragBoxSize
       )
-      .animation(.default)
+      .onTapGesture {
+        cardShown.toggle()
+      }
+      .gesture(
+        DragGesture()
+          .onChanged { value in
+            self.dragBoxSize = value.translation
+            self.cardShown = true
+          }
+          .onEnded { value in
+            self.dragBoxSize = .zero
+            self.cardShown = false
+          }
+      )
+      .animation(.spring(response: 0.3,
+                         dampingFraction: 0.6,
+                         blendDuration: 0.0))
     }
   }
 }
@@ -54,6 +73,9 @@ struct ContentView_Previews: PreviewProvider {
 }
 
 struct CardView: View {
+  
+  var dragOffset: CGSize = .zero
+
   var body: some View {
     VStack {
       HStack {
@@ -81,6 +103,7 @@ struct CardView: View {
     .cornerRadius(20)
     .shadow(radius: 20)
     .blendMode(.hardLight)
+    .offset(dragOffset)
   }
 }
 
@@ -90,6 +113,7 @@ struct BackCardView: View {
   var backgroundColor: Color = .blue
   var scaleFactor: CGFloat = 1.0
   var rotationDegree: Double = .zero
+  var dragOffset: CGSize = .zero
 
   var body: some View {
     VStack {
@@ -107,6 +131,7 @@ struct BackCardView: View {
       axis: (x: CGFloat(rotationDegree), y: 0.0, z: 0.0)
     )
     .blendMode(.hardLight)
+    .offset(dragOffset)
   }
 }
 

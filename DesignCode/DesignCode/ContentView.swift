@@ -51,18 +51,24 @@ struct ContentView: View {
       .gesture(
         DragGesture()
           .onChanged { value in
-            self.dragBoxSize = value.translation
-            self.cardShown = true
+            onCardDragChanged(offset: value.translation)
           }
           .onEnded { value in
-            self.dragBoxSize = .zero
-            self.cardShown = false
+            onCardDragEnded()
           }
       )
-      .animation(.spring(response: 0.3,
-                         dampingFraction: 0.6,
-                         blendDuration: 0.0))
+      .animation(.spring(response: 0.3, dampingFraction: 0.6, blendDuration: 0.0))
     }
+  }
+  
+  func onCardDragChanged(offset: CGSize) {
+    self.dragBoxSize = offset
+    self.cardShown = offset.height >= -50
+  }
+  
+  func onCardDragEnded() {
+    self.dragBoxSize = .zero
+    self.cardShown = false
   }
 }
 

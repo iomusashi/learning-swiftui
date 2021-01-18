@@ -11,25 +11,27 @@ struct ContentView: View {
   
   @State var cardShown = false
   @State var dragBoxSize = CGSize.zero
+  @State var descriptionShown = false
   
   var body: some View {
     ZStack {
       TitleView(
-        blurRadius: cardShown ? 20 : 0
+        blurRadius: cardShown ? 20 : 0,
+        opacity: descriptionShown ? 0.4 : 1.0,
+        offset: CGPoint(x: 0, y: descriptionShown ? -200 : 0)
       )
-      .animation(.default)
-
-      BottomCardView(
-        blurRadius: cardShown ? 20 : 0
+      .animation(
+        .timingCurve(0.2, 0.8, 0.2, 1.0, duration: 0.8)
       )
-      .animation(.default)
 
       BackCardView(
         offset: CGPoint(x: 0, y: cardShown ? -400 : -40),
         backgroundColor: Color("card4"),
         scaleFactor: 0.9,
-        rotationDegree: cardShown ? 0 : 10,
-        dragOffset: dragBoxSize
+        rotationDegree: cardShown || descriptionShown ? 0 : 10,
+        dragOffset: dragBoxSize,
+        frameSize: CGSize(width: descriptionShown ? 375 : 340, height: 220),
+        expansionOffset: CGPoint(x: 0, y: descriptionShown ? -140 : 0)
       )
       .animation(.easeInOut(duration: 0.4))
 
@@ -37,16 +39,20 @@ struct ContentView: View {
         offset: CGPoint(x: 0, y: cardShown ? -200 : -20),
         backgroundColor: Color("card3"),
         scaleFactor: 0.95,
-        rotationDegree: cardShown ? 0 : 5,
-        dragOffset: dragBoxSize
+        rotationDegree: cardShown || descriptionShown ? 0 : 5,
+        dragOffset: dragBoxSize,
+        frameSize: CGSize(width: descriptionShown ? 375 : 340, height: 220),
+        expansionOffset: CGPoint(x: 0, y: descriptionShown ? -120 : 0)
       )
       .animation(.easeInOut(duration: 0.3))
 
       CardView(
-        dragOffset: dragBoxSize
+        dragOffset: dragBoxSize,
+        frameSize: CGSize(width: descriptionShown ? 375 : 340, height: 220),
+        expansionOffset: CGPoint(x: 0, y: descriptionShown ? -100 : 0)
       )
       .onTapGesture {
-        cardShown.toggle()
+        descriptionShown.toggle()
       }
       .gesture(
         DragGesture()
@@ -58,6 +64,14 @@ struct ContentView: View {
           }
       )
       .animation(.spring(response: 0.3, dampingFraction: 0.6, blendDuration: 0.0))
+
+      BottomCardView(
+        blurRadius: cardShown ? 20 : 0,
+        offset: CGPoint(x: 0, y: descriptionShown ? 360 : 1000)
+      )
+      .animation(
+        .timingCurve(0.2, 0.8, 0.2, 1.0, duration: 0.8)
+      )
     }
   }
   
@@ -81,6 +95,8 @@ struct ContentView_Previews: PreviewProvider {
 struct CardView: View {
   
   var dragOffset: CGSize = .zero
+  var frameSize: CGSize = CGSize(width: 340, height: 220)
+  var expansionOffset: CGPoint = .zero
 
   var body: some View {
     VStack {
@@ -104,12 +120,13 @@ struct CardView: View {
         .aspectRatio(contentMode: .fill)
         .frame(width: 300, height: 110, alignment: .top)
     }
-    .frame(width: 340, height: 220)
+    .frame(width: frameSize.width, height: frameSize.height)
     .background(Color.black)
-    .cornerRadius(20)
+    .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
     .shadow(radius: 20)
-    .blendMode(.hardLight)
     .offset(dragOffset)
+    .offset(x: expansionOffset.x, y: expansionOffset.y)
+    .blendMode(.hardLight)
   }
 }
 
@@ -120,12 +137,14 @@ struct BackCardView: View {
   var scaleFactor: CGFloat = 1.0
   var rotationDegree: Double = .zero
   var dragOffset: CGSize = .zero
+  var frameSize: CGSize = CGSize(width: 340, height: 220)
+  var expansionOffset: CGPoint = .zero
 
   var body: some View {
     VStack {
       Spacer()
     }
-    .frame(width: 340, height: 220)
+    .frame(width: frameSize.width, height: frameSize.height)
     .background(backgroundColor)
     .cornerRadius(20)
     .shadow(radius: 20)
@@ -136,14 +155,17 @@ struct BackCardView: View {
       .degrees(rotationDegree),
       axis: (x: CGFloat(rotationDegree), y: 0.0, z: 0.0)
     )
-    .blendMode(.hardLight)
     .offset(dragOffset)
+    .offset(x: expansionOffset.x, y: expansionOffset.y)
+    .blendMode(.hardLight)
   }
 }
 
 struct TitleView: View {
   
   var blurRadius: CGFloat = .zero
+  var opacity: Double = 1.0
+  var offset: CGPoint = .zero
   
   var body: some View {
     VStack {
@@ -157,13 +179,16 @@ struct TitleView: View {
       Image("Background1")
       Spacer()
     }
+    .offset(x: offset.x, y: offset.y)
     .blur(radius: blurRadius)
+    .opacity(opacity)
   }
 }
 
 struct BottomCardView: View {
   
   var blurRadius: CGFloat = .zero
+  var offset: CGPoint = .zero
   
   var body: some View {
     VStack(spacing: 20.0) {
@@ -183,7 +208,7 @@ struct BottomCardView: View {
     .background(Color.white)
     .cornerRadius(30)
     .shadow(radius: 20)
-    .offset(x: 0, y: 500)
+    .offset(x: offset.x, y: offset.y)
     .blur(radius: blurRadius)
   }
 }

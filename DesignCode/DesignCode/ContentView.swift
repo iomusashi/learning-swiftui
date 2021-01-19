@@ -12,6 +12,7 @@ struct ContentView: View {
   @State var cardShown = false
   @State var dragBoxSize = CGSize.zero
   @State var descriptionShown = false
+  @State var bottomCardDragBoxSize = CGSize.zero
   
   var body: some View {
     ZStack {
@@ -57,6 +58,7 @@ struct ContentView: View {
       .gesture(
         DragGesture()
           .onChanged { value in
+            descriptionShown = false
             onCardDragChanged(offset: value.translation)
           }
           .onEnded { value in
@@ -67,7 +69,20 @@ struct ContentView: View {
 
       BottomCardView(
         blurRadius: cardShown ? 20 : 0,
-        offset: CGPoint(x: 0, y: descriptionShown ? 360 : 1000)
+        offset: CGPoint(x: 0, y: descriptionShown ? 360 : 1000),
+        dragOffset: bottomCardDragBoxSize
+      )
+      .gesture(
+        DragGesture()
+          .onChanged { value in
+            bottomCardDragBoxSize.height = value.translation.height < -120 ? -120 : value.translation.height
+          }
+          .onEnded { value in
+            if bottomCardDragBoxSize.height > 50 {
+              descriptionShown = false
+            }
+            bottomCardDragBoxSize = .zero
+          }
       )
       .animation(
         .timingCurve(0.2, 0.8, 0.2, 1.0, duration: 0.8)
@@ -189,6 +204,7 @@ struct BottomCardView: View {
   
   var blurRadius: CGFloat = .zero
   var offset: CGPoint = .zero
+  var dragOffset: CGSize = .zero
   
   var body: some View {
     VStack(spacing: 20.0) {
@@ -209,6 +225,7 @@ struct BottomCardView: View {
     .cornerRadius(30)
     .shadow(radius: 20)
     .offset(x: offset.x, y: offset.y)
+    .offset(dragOffset)
     .blur(radius: blurRadius)
   }
 }

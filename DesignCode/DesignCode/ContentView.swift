@@ -13,6 +13,7 @@ struct ContentView: View {
   @State var dragBoxSize = CGSize.zero
   @State var descriptionShown = false
   @State var bottomCardDragBoxSize = CGSize.zero
+  @State var lastBottomCardDragBoxSize = CGSize.zero
   
   var body: some View {
     ZStack {
@@ -75,13 +76,14 @@ struct ContentView: View {
       .gesture(
         DragGesture()
           .onChanged { value in
-            bottomCardDragBoxSize.height = value.translation.height < -120 ? -120 : value.translation.height
+            bottomCardDragBoxSize.height = value.translation.height + lastBottomCardDragBoxSize.height
           }
           .onEnded { value in
             if bottomCardDragBoxSize.height > 50 {
               descriptionShown = false
             }
-            bottomCardDragBoxSize = .zero
+            bottomCardDragBoxSize.height = bottomCardDragBoxSize.height < -120 ? -300 : .zero
+            lastBottomCardDragBoxSize = bottomCardDragBoxSize
           }
       )
       .animation(
